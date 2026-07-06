@@ -49,8 +49,26 @@ export async function POST(request: Request) {
 }
 
 
-export async function GET(req: Request) {
+export async function GET() {
+  try {
+    const records = await pb.collection("pricing_table").getFullList({
+      sort: "short_name",
+    })
 
-  return Response.json({})
+    const pricing: PricingType[] = records.map((r) => ({
+      short_name: r.short_name,
+      article_number: r.article_number,
+      description: r.description,
+      article_type: r.article_type,
+      netto_price: r.netto_price,
+      brutto_price: r.brutto_price,
+      unit_single: r.unit_single,
+      unit_multiple: r.unit_multiple,
+    }))
 
+    return Response.json(pricing, { status: 200 })
+  } catch (error) {
+    console.log("Fehler beim Laden der Preisliste", error)
+    return new Response(`Fehler: ${error}`, { status: 500 })
+  }
 }
